@@ -1,2 +1,29 @@
 
+obj/
+bin/
+.vs/
+packages/
+publish/
 
+Migrations/
+
+
+*.user
+*.bak
+*.userprefs
+build/
+.DS_Store
+build_web
+COS730.RestApi/log/
+COS730.Common/log/
+COS730.Dapper/log/
+COS730.Models/log/
+COS730.UserService/log/
+*.txt
+*.editorconfig
+COS730.RestApi/.idea/
+COS730.Common/.idea/
+COS730.Dapper/.idea/
+COS730.Models/.idea/
+COS730.UserService/.idea/
+*.nupkg
