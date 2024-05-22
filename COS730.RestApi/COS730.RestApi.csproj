@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\COS730.Dapper\COS730.Dapper.csproj" />
+    <ProjectReference Include="..\COS730.UserService\COS730.UserService.csproj" />
   </ItemGroup>
 
 </Project>
