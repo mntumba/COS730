@@ -1,5 +1,5 @@
 ﻿using COS730.Dapper;
-using COS730.Helpers;
+using COS730.Helpers.Interfaces;
 using COS730.Models.DBModels;
 using COS730.Models.Requests;
 using COS730.Models.Responses;
@@ -7,13 +7,13 @@ using Microsoft.Extensions.Logging;
 
 namespace COS730.UserService
 {
-    public class AuthenticationService : BaseService
+    public class AuthenticationService : MainService
     {
         public AuthenticationService(DapperConnection connection, ILogger logger) : base(connection, logger)
         {
         }
 
-        public AuthResponse Authenticate(AuthRequest request)
+        public AuthResponse Authenticate(AuthRequest request, IEncryptionHelper encryptionHelper)
         {
             AuthResponse response = new();
 
@@ -29,7 +29,7 @@ namespace COS730.UserService
                 return response;
             }
 
-            if (!EncryptionHelper.IsValid(request.Password!, user.Password!))
+            if (!encryptionHelper.VerifyCode(request.Password!, user.Password!))
             {
                 response.ErrorMessage = "Invalid email or password.";
                 return response;
@@ -49,27 +49,28 @@ namespace COS730.UserService
             };
         }
 
-        public string CreateAccount(AccountRequest request)
+        public string CreateAccount(AccountRequest request, IEncryptionHelper encryptionHelper, IEmailHelper emailHelper)
         {
             try
             {
-                var otp = EncryptionHelper.GenerateOtp();
+                var otp = encryptionHelper.GenerateOtp();
 
-                var password = EncryptionHelper.EncryptCode(request.Password!);
+                var encryptedPassword = encryptionHelper.EncryptCode(request.Password!);
+
+                var encryptedOtp = encryptionHelper.EncryptCode(otp);
 
                 DBContext.User!.Add(new User
                 {
                     Name = request.Name,
                     Email = request.Email,
-                    Password = password,
-                    OTP = EncryptionHelper.EncryptCode(otp),
+                    Password = encryptedPassword,
+                    OTP = encryptedOtp,
                     IsVerified = false,
-
                 });
 
                 DBContext.SaveChanges();
 
-                EmailHelper.SendEmail(request.Email!, "Verificattion code", otp);
+                emailHelper.SendEmail(request.Email!, "Verificattion code", otp);
 
                 return "Account successfully created!";
             }
@@ -79,7 +80,7 @@ namespace COS730.UserService
             }
         }
 
-        public AuthResponse VerifyAccount(OTPRequest request)
+        public AuthResponse VerifyAccount(OTPRequest request, IEncryptionHelper encryptionHelper)
         {
             AuthResponse response = new();
 
@@ -89,7 +90,7 @@ namespace COS730.UserService
                  select u
                 ).SingleOrDefault()!;
 
-            bool isOTPValid = EncryptionHelper.IsValid(request.OTP!, user.OTP!);
+            bool isOTPValid = encryptionHelper.VerifyCode(request.OTP!, user.OTP!);
 
             if (isOTPValid)
             {

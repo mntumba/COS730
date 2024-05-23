@@ -1,41 +1,52 @@
-﻿using System.Net;
+﻿using COS730.Helpers.Interfaces;
+using COS730.Models.Settings;
+using Microsoft.Extensions.Options;
+using System.Net;
 using System.Net.Mail;
 
 namespace COS730.Helpers
 {
-    public static class EmailHelper
+    public class EmailHelper : IEmailHelper
     {
-        public static void SendEmail(string toEmail, string subject, string body)
+        private readonly EmailSettings _emailSettings;
+
+        public EmailHelper(IOptions<EmailSettings> emailSettings)
+        {
+            _emailSettings = emailSettings.Value;
+        }
+
+        public void SendEmail(string email, string subject, string message)
         {
             try
             {
                 // Set up the SMTP client
-                SmtpClient smtpClient = new("smtp.gmail.com", 587)
+                SmtpClient smtpClient = new(_emailSettings.MailServer, _emailSettings.MailPort)
                 {
                     UseDefaultCredentials = false,
-                    Credentials = new NetworkCredential("marmap4@gmail.com", "uongissnirufnvbi"),
+                    Credentials = new NetworkCredential(_emailSettings.Sender, _emailSettings.Password),
                     EnableSsl = true
                 };
 
                 // Create the mail message
                 MailMessage mail = new()
                 {
-                    From = new MailAddress("marmap4@gmail.com"),
+                    From = new MailAddress(_emailSettings.Sender!),
                     Subject = subject,
-                    Body = body,
+                    Body = message,
                     IsBodyHtml = true
                 };
 
                 // Add the recipient
-                mail.To.Add(toEmail);
+                mail.To.Add(email);
 
                 smtpClient.Send(mail);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to send email. Error: {ex.Message}");
+                throw new InvalidOperationException(ex.Message);
             }
         }
+
 
     }
 }

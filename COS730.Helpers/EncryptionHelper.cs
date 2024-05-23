@@ -1,25 +1,42 @@
-﻿using OtpNet;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using COS730.Helpers.Interfaces;
+using COS730.Models.Settings;
+using Microsoft.Extensions.Options;
+using OtpNet;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace COS730.Helpers
 {
-    public class EncryptionHelper
+    public class EncryptionHelper : IEncryptionHelper
     {
-        private static string GenerateSecretKey()
-        {
-            var key = KeyGeneration.GenerateRandomKey(20);
+        private readonly EncryptionSettings _encryptionSettings;
 
-            return Base32Encoding.ToString(key);
+        public EncryptionHelper(IOptions<EncryptionSettings> encryptionSettings)
+        {
+            _encryptionSettings = encryptionSettings.Value;
         }
 
-        public static string GenerateOtp()
+        private (byte[] iv, byte[] encryptedAesKey) EncryptAesKey(Aes aes)
         {
-            var secretKey = GenerateSecretKey();
+            aes.GenerateIV();
+            byte[] iv = aes.IV;
+
+            using var rsa = new RSACryptoServiceProvider();
+            rsa.ImportRSAPublicKey(Convert.FromBase64String(_encryptionSettings.PublicKey!), out _);
+
+            byte[] encryptedAesKey = rsa.Encrypt(aes.Key, RSAEncryptionPadding.Pkcs1);
+
+            return (iv, encryptedAesKey);
+        }
+
+        public string GenerateOtp()
+        {
+            byte[] encryptedAesKey;
+
+            using var aes = Aes.Create();
+            (_, encryptedAesKey) = EncryptAesKey(aes);
+
+            var secretKey = Base32Encoding.ToString(encryptedAesKey);
 
             var secretKeyBytes = Base32Encoding.ToBytes(secretKey);
 
@@ -28,34 +45,67 @@ namespace COS730.Helpers
             return totp.ComputeTotp();
         }
 
-        public static string EncryptCode(string encryptString)
+        public (byte[] EncryptedMessage, byte[] EncryptedAesKey, byte[] IV) EncryptMessage(string message)
         {
-            string EncryptionKey = "ZWDJOVMPQ4RGPG7E5P7VUQP4JNMEPDM7BMHPTZOXD6SGDAJVAKRTGZD2YIPGLAVE";
-            byte[] clearBytes = Encoding.Unicode.GetBytes(encryptString);
+            byte[] encryptedData;
+            byte[] encryptedAesKey;
+            byte[] iv;
 
-            using (Aes encryptor = Aes.Create())
+            using (var aes = Aes.Create())
             {
-                Rfc2898DeriveBytes pdb = new(EncryptionKey, Base32Encoding.ToBytes(EncryptionKey));
-                encryptor.Key = pdb.GetBytes(32);
-                encryptor.IV = pdb.GetBytes(16);
+                (iv, encryptedAesKey) = EncryptAesKey(aes);
 
-                using MemoryStream ms = new();
-                using (CryptoStream cs = new(ms, encryptor.CreateEncryptor(), CryptoStreamMode.Write))
+                using var encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
+                using var ms = new MemoryStream();
+                using (var cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
+                using (var writer = new StreamWriter(cs))
                 {
-                    cs.Write(clearBytes, 0, clearBytes.Length);
-                    cs.Close();
+                    writer.Write(message);
                 }
-                encryptString = Convert.ToBase64String(ms.ToArray());
+
+                encryptedData = ms.ToArray();
             }
 
-            return encryptString;
+            return (encryptedData, encryptedAesKey, iv);
         }
 
-        public static bool IsValid(string password, string hashPassword)
+        public string DecryptMessage(byte[] encryptedMessage, byte[] encryptedAesKey, byte[] iv)
         {
-            var inputPassword = EncryptCode(password);
+            string decryptedData;
 
-            return string.Equals(hashPassword, inputPassword);
+            using (var rsa = new RSACryptoServiceProvider())
+            {
+                rsa.ImportRSAPrivateKey(Convert.FromBase64String(_encryptionSettings.PrivateKey!), out _);
+                var aesKey = rsa.Decrypt(encryptedAesKey, RSAEncryptionPadding.Pkcs1);
+
+                using var aes = Aes.Create();
+                aes.Key = aesKey;
+                aes.IV = iv;
+
+                using var decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+                using var ms = new MemoryStream(encryptedMessage);
+                using var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read);
+                using var reader = new StreamReader(cs);
+                decryptedData = reader.ReadToEnd();
+            }
+
+            return decryptedData;
+        }
+
+        public string EncryptCode(string code)
+        {
+            byte[] saltBytes = Encoding.Unicode.GetBytes(_encryptionSettings.EncryptionKey!);
+
+            using var deriveBytes = new Rfc2898DeriveBytes(code, saltBytes, 10000);
+            byte[] hashBytes = deriveBytes.GetBytes(20);
+            string hashCode = Convert.ToBase64String(hashBytes);
+
+            return hashCode;
+        }
+
+        public bool VerifyCode(string code, string storedHashCode)
+        {
+            return EncryptCode(code) == storedHashCode;
         }
     }
 }

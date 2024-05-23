@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace COS730.Dapper
 {
-    public class BaseService
+    public class MainService
     {
         private readonly DapperConnection _dbConnection;
         private bool disposed = false;
@@ -11,13 +11,13 @@ namespace COS730.Dapper
 
         public ApiDBContext DBContext { get { return _dbConnection.DBContext; } }
 
-        public BaseService(DapperConnection connection, ILogger logger)
+        public MainService(DapperConnection connection, ILogger logger)
         {
             _dbConnection = connection;
             this.Logger = logger;
         }
 
-        ~BaseService()
+        ~MainService()
         {
             if (disposed)
                 return;

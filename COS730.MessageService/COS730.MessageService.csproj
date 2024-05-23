@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\COS730.Dapper\COS730.Dapper.csproj" />
+    <ProjectReference Include="..\COS730.Helpers\COS730.Helpers.csproj" />
+  </ItemGroup>
+
+</Project>
