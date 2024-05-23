@@ -71,5 +71,23 @@ namespace COS730.RestApi.Controllers
                 return BadRequest("An error occurred.");
             }
         }
+
+        [HttpPost("detectSpam/{message}")]
+        public ActionResult DetectSpam(string message)
+        {
+            try
+            {
+                var _mlService = new MLService(DBConnection, this.Logger);
+
+                var response = _mlService.VerifySpam(message);
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                this.Logger.LogError(ex, $"Error occurred in [{MethodBase.GetCurrentMethod()!.Name}]");
+                return BadRequest("An error occurred.");
+            }
+        }
     }
 }
