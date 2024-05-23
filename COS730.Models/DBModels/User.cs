@@ -10,6 +10,7 @@ namespace COS730.Models.DBModels
         public string? Email { get; set; }
         public string? Name { get; set; }
         public string? Password { get; set; }
+        public string? PreferedLanguage { get; set; }
         public string? OTP { get; set; }
         public bool IsVerified { get; set; }
 

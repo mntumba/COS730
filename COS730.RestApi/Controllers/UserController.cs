@@ -14,8 +14,8 @@ namespace COS730.RestApi.Controllers
     {
         private readonly IEmailHelper _emailHelper;
         private readonly IEncryptionHelper _encryptionHelper;
-        public UserController(ILogger<UserController> logger, IEmailHelper emailHelper, IEncryptionHelper encryptionHelper, IOptions<SQLConnectionSettings> sQLConnectionSettings) 
-            : base(logger, sQLConnectionSettings)
+        public UserController(ILogger<UserController> logger, IEmailHelper emailHelper, IEncryptionHelper encryptionHelper) 
+            : base(logger)
         {
             _emailHelper = emailHelper;
             _encryptionHelper = encryptionHelper;

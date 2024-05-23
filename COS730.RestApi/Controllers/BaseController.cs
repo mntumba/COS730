@@ -12,11 +12,11 @@ namespace COS730.RestApi.Controllers
     {
         protected ILogger Logger { get; }
         private readonly ApiDBContext _dbContext;
-        public BaseController(ILogger logger, IOptions<SQLConnectionSettings> sQLConnectionSettings)
+        public BaseController(ILogger logger)
         {
             this.Logger = logger;
 
-            var apiDbContextFactory = new ApiDBContextFactory(sQLConnectionSettings);
+            var apiDbContextFactory = new ApiDBContextFactory();
             _dbContext = apiDbContextFactory.CreateDbContext(Array.Empty<string>());
         }
 
