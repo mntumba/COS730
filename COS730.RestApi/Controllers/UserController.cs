@@ -1,8 +1,6 @@
 ﻿using COS730.Helpers.Interfaces;
 using COS730.Models.Requests;
-using COS730.Models.Settings;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using System.Reflection;
 using AuthenticationService = COS730.UserService.AuthenticationService;
 
