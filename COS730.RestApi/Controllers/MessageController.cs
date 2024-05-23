@@ -14,8 +14,8 @@ namespace COS730.RestApi.Controllers
     {
         private readonly IEncryptionHelper _encryptionHelper;
 
-        public MessageController(ILogger<MessageController> logger, IEncryptionHelper encryptionHelper, IOptions<SQLConnectionSettings> sQLConnectionSettings) 
-            : base(logger, sQLConnectionSettings)
+        public MessageController(ILogger<MessageController> logger, IEncryptionHelper encryptionHelper) 
+            : base(logger)
         {
             _encryptionHelper = encryptionHelper;
         }

@@ -9,15 +9,27 @@ namespace COS730.MessageService
 {
     public class EndToEndService : MainService
     {
+        private readonly DapperConnection _connection;
         public EndToEndService(DapperConnection connection, ILogger logger) : base(connection, logger)
         {
+            _connection = connection;
         }
 
         public string SendMessage(MessageRequest request, IEncryptionHelper encryptionHelper)
         {
             try
             {
-                var (EncryptedMessage, EncryptedAesKey, IV) = encryptionHelper.EncryptMessage(request.Message!);
+                var user = 
+                    (from u in DBContext.User
+                     where u.Email == request.RecipientEmail
+                     select u
+                     ).SingleOrDefault();
+
+                var _nlpService = new NLPService(_connection, this.Logger);
+
+                var translatedMessage = _nlpService.TranslateMessage(request.Message!, user!.PreferedLanguage!);
+
+                var (EncryptedMessage, EncryptedAesKey, IV) = encryptionHelper.EncryptMessage(translatedMessage);
 
                 DBContext.Message!.Add(new Message
                 {

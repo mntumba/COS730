@@ -7,16 +7,14 @@ namespace COS730.DBContext.Dapper
 {
     public class ApiDBContextFactory : IDesignTimeDbContextFactory<ApiDBContext>
     {
-        private readonly SQLConnectionSettings _sQLConnectionSettings;
-        public ApiDBContextFactory(IOptions<SQLConnectionSettings> sQLConnectionSettings)
+        public ApiDBContextFactory()
         {
-            _sQLConnectionSettings = sQLConnectionSettings.Value;
         }
 
         public ApiDBContext CreateDbContext(string[] args)
         {
             var dbContextBuilder = new DbContextOptionsBuilder<ApiDBContext>();
-            dbContextBuilder.UseSqlServer(_sQLConnectionSettings.ConnectionString);
+            dbContextBuilder.UseSqlServer("Server=.;Database=COS-730;Trusted_Connection=True;TrustServerCertificate=True;");
             return new ApiDBContext(dbContextBuilder.Options);
         }
     }

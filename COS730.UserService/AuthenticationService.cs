@@ -64,6 +64,7 @@ namespace COS730.UserService
                     Name = request.Name,
                     Email = request.Email,
                     Password = encryptedPassword,
+                    PreferedLanguage = request.PreferedLanguage,
                     OTP = encryptedOtp,
                     IsVerified = false,
                 });
