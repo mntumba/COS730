@@ -1,9 +1,7 @@
 ﻿using COS730.Helpers.Interfaces;
 using COS730.MessageService;
 using COS730.Models.Requests;
-using COS730.Models.Settings;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using System.Reflection;
 
 namespace COS730.RestApi.Controllers
@@ -21,7 +19,7 @@ namespace COS730.RestApi.Controllers
         }
 
         [HttpPost("sendMessage")]
-        public ActionResult GetChatHistory([FromBody] MessageRequest request)
+        public ActionResult SendMessage([FromBody] MessageRequest request)
         {
             try
             {
@@ -46,6 +44,24 @@ namespace COS730.RestApi.Controllers
                 var _e2eService = new EndToEndService(DBConnection, this.Logger);
 
                 var response = _e2eService.GetChatHistory(request, _encryptionHelper);
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                this.Logger.LogError(ex, $"Error occurred in [{MethodBase.GetCurrentMethod()!.Name}]");
+                return BadRequest("An error occurred.");
+            }
+        }
+
+        [HttpPost("readVoiceMsgAsText/{audioPath}")]
+        public ActionResult ReadVoiceMsgAsText(string audioPath)
+        {
+            try
+            {
+                var _nlpService = new NLPService(DBConnection, this.Logger);
+
+                var response = _nlpService.ConvertVoiceToText(audioPath);
 
                 return Ok(response);
             }

@@ -1,8 +1,6 @@
 ﻿using COS730.Dapper;
 using COS730.DBContext.Dapper;
-using COS730.Models.Settings;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace COS730.RestApi.Controllers
 {
