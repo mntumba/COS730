@@ -2,12 +2,15 @@
 using Microsoft.Extensions.Logging;
 using System.Text.RegularExpressions;
 using Google.Cloud.Language.V1;
+using Google.Protobuf.Collections;
+using Google.Cloud.Dialogflow.V2;
 
 namespace COS730.MessageService
 {
     public class MLService : MainService
     {
         private readonly LanguageServiceClient _client;
+        private readonly SessionsClient _sessionsClient;
 
         private List<string>  _spamKeywords = new()
         {
@@ -21,6 +24,7 @@ namespace COS730.MessageService
         public MLService(DapperConnection connection, ILogger logger) : base(connection, logger)
         {
             _client = LanguageServiceClient.Create();
+            _sessionsClient = SessionsClient.Create();
         }
 
         public string VerifySpam(string message)
@@ -42,12 +46,32 @@ namespace COS730.MessageService
             return "The message is not considered spam.";
         }
 
+        public async Task<List<RepeatedField<string>>> SuggestRepliesAsync(string message)
+        {
+            var sessionId = Guid.NewGuid().ToString();
+            SessionName session = new("assignment02-424301", sessionId);
+            var queryInput = new QueryInput
+            {
+                Text = new TextInput
+                {
+                    Text = message,
+                    LanguageCode = "en"
+                }
+            };
+
+            var response = await _sessionsClient.DetectIntentAsync(session, queryInput);
+            var queryResult = response.QueryResult;
+
+            return queryResult.FulfillmentMessages.Select(msg => msg.Text.Text_).ToList();
+        }
+
+
         private double AnalyzeSentiment(string message)
         {
-            var document = new Document
+            var document = new Google.Cloud.Language.V1.Document
             {
                 Content = message,
-                Type = Document.Types.Type.PlainText
+                Type = Google.Cloud.Language.V1.Document.Types.Type.PlainText
             };
 
             var response = _client.AnalyzeSentimentAsync(new AnalyzeSentimentRequest { Document = document });
@@ -60,10 +84,10 @@ namespace COS730.MessageService
 
         private double AnalyzeEntitySentiment(string message)
         {
-            var document = new Document
+            var document = new Google.Cloud.Language.V1.Document
             {
                 Content = message,
-                Type = Document.Types.Type.PlainText
+                Type = Google.Cloud.Language.V1.Document.Types.Type.PlainText
             };
             var response = _client.AnalyzeEntitySentimentAsync(document);
 

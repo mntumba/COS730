@@ -89,5 +89,23 @@ namespace COS730.RestApi.Controllers
                 return BadRequest("An error occurred.");
             }
         }
+
+        [HttpPost("suggestReplies/{message}")]
+        public async Task<ActionResult> SuggestRepliesAsync(string message)
+        {
+            try
+            {
+                var _mlService = new MLService(DBConnection, this.Logger);
+
+                var response = await _mlService.SuggestRepliesAsync(message);
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                this.Logger.LogError(ex, $"Error occurred in [{MethodBase.GetCurrentMethod()!.Name}]");
+                return BadRequest("An error occurred.");
+            }
+        }
     }
 }
