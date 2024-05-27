@@ -1,5 +1,7 @@
 using COS730.Helpers;
 using COS730.Helpers.Interfaces;
+using COS730.MessageService;
+using COS730.MessageService.Interfaces;
 using COS730.Models.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +28,7 @@ builder.Services.Configure<EncryptionSettings>(config.GetSection("EncryptionSett
 
 builder.Services.AddSingleton<IEmailHelper, EmailHelper>();
 builder.Services.AddSingleton<IEncryptionHelper, EncryptionHelper>();
+builder.Services.AddSingleton<INLPService, NLPService>();
 
 var app = builder.Build();
 

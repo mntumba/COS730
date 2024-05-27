@@ -1,5 +1,6 @@
 ﻿using COS730.Helpers.Interfaces;
 using COS730.MessageService;
+using COS730.MessageService.Interfaces;
 using COS730.Models.Requests;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection;
@@ -11,11 +12,13 @@ namespace COS730.RestApi.Controllers
     public class MessageController : BaseController
     {
         private readonly IEncryptionHelper _encryptionHelper;
+        private readonly INLPService _nlpService;
 
-        public MessageController(ILogger<MessageController> logger, IEncryptionHelper encryptionHelper) 
+        public MessageController(ILogger<MessageController> logger, IEncryptionHelper encryptionHelper, INLPService nlpService) 
             : base(logger)
         {
             _encryptionHelper = encryptionHelper;
+            _nlpService = nlpService;
         }
 
         [HttpPost("sendMessage")]
@@ -23,7 +26,7 @@ namespace COS730.RestApi.Controllers
         {
             try
             {
-                var _e2eService = new EndToEndService(DBConnection, this.Logger);
+                var _e2eService = new EndToEndService(DBConnection, this.Logger, _nlpService);
 
                 var response = _e2eService.SendMessage(request, _encryptionHelper);
 
@@ -41,7 +44,7 @@ namespace COS730.RestApi.Controllers
         {
             try
             {
-                var _e2eService = new EndToEndService(DBConnection, this.Logger);
+                var _e2eService = new EndToEndService(DBConnection, this.Logger, _nlpService);
 
                 var response = _e2eService.GetChatHistory(request, _encryptionHelper);
 
@@ -59,7 +62,7 @@ namespace COS730.RestApi.Controllers
         {
             try
             {
-                var _nlpService = new NLPService(DBConnection, this.Logger);
+                var _nlpService = new NLPService();
 
                 var response = _nlpService.ConvertVoiceToText(audioPath);
 

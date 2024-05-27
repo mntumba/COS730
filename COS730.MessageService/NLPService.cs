@@ -2,15 +2,16 @@
 using Google.Cloud.Translation.V2;
 using Google.Cloud.Speech.V1;
 using Microsoft.Extensions.Logging;
+using COS730.MessageService.Interfaces;
 
 namespace COS730.MessageService
 {
-    public class NLPService : MainService
+    public class NLPService : INLPService
     {
         private readonly TranslationClient _translationclient;
         private readonly SpeechClient _speechClient;
 
-        public NLPService(DapperConnection connection, ILogger logger) : base(connection, logger)
+        public NLPService()// DapperConnection connection, ILogger logger) : base(connection, logger)
         {
             _translationclient = TranslationClient.Create();
             _speechClient = SpeechClient.Create();

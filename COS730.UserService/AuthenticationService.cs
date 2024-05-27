@@ -97,11 +97,13 @@ namespace COS730.UserService
             {
                 user.IsVerified = true;
                 DBContext.SaveChanges();
-                return response;
+                return new AuthResponse 
+                {
+                    IsVerified = true
+                };
             }
 
-            response.ErrorMessage = "Wrong Otp!";
-            return response;
+            return new AuthResponse { ErrorMessage = "Wrong Otp!" };
         }
     }
 }
