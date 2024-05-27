@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "COS730.UserService", "..\CO
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "COS730.Helpers", "..\COS730.Helpers\COS730.Helpers.csproj", "{1B0EEAC8-1041-4DC3-8C4E-0A7E1EA8BBDC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "COS730.MessageService", "..\COS730.MessageService\COS730.MessageService.csproj", "{4BD742F7-A84D-431C-8F75-6560DE736D74}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "COS730.MessageService", "..\COS730.MessageService\COS730.MessageService.csproj", "{4BD742F7-A84D-431C-8F75-6560DE736D74}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "COS730.UnitTests", "..\COS730.UnitTests\COS730.UnitTests.csproj", "{1A2E5A2A-1991-42C5-BFFA-2D5701A5C559}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{4BD742F7-A84D-431C-8F75-6560DE736D74}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4BD742F7-A84D-431C-8F75-6560DE736D74}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4BD742F7-A84D-431C-8F75-6560DE736D74}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A2E5A2A-1991-42C5-BFFA-2D5701A5C559}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A2E5A2A-1991-42C5-BFFA-2D5701A5C559}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A2E5A2A-1991-42C5-BFFA-2D5701A5C559}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A2E5A2A-1991-42C5-BFFA-2D5701A5C559}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

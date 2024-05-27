@@ -1,5 +1,6 @@
 ﻿using COS730.Dapper;
 using COS730.Helpers.Interfaces;
+using COS730.MessageService.Interfaces;
 using COS730.Models.DBModels;
 using COS730.Models.Requests;
 using COS730.Models.Responses;
@@ -10,12 +11,15 @@ namespace COS730.MessageService
     public class EndToEndService : MainService
     {
         private readonly DapperConnection _connection;
-        public EndToEndService(DapperConnection connection, ILogger logger) : base(connection, logger)
+        private readonly INLPService _nlpService;
+
+        public EndToEndService(DapperConnection connection, ILogger logger, INLPService nlpService) : base(connection, logger)
         {
             _connection = connection;
+            _nlpService = nlpService;
         }
 
-        public string SendMessage(MessageRequest request, IEncryptionHelper encryptionHelper)
+        public (Message response, string message) SendMessage(MessageRequest request, IEncryptionHelper encryptionHelper)
         {
             try
             {
@@ -25,24 +29,25 @@ namespace COS730.MessageService
                      select u
                      ).SingleOrDefault();
 
-                var _nlpService = new NLPService(_connection, this.Logger);
 
                 var translatedMessage = _nlpService.TranslateMessage(request.Message!, user!.PreferedLanguage!);
 
                 var (EncryptedMessage, EncryptedAesKey, IV) = encryptionHelper.EncryptMessage(translatedMessage);
 
-                DBContext.Message!.Add(new Message
+                var message = new Message
                 {
                     SenderEmail = request.SenderEmail,
                     RecipientEmail = request.RecipientEmail,
                     MessageData = EncryptedMessage,
                     MessageKey = EncryptedAesKey,
                     MessageIV = IV,
-                });
+                };
+
+                DBContext.Message!.Add(message);
 
                 DBContext.SaveChanges();
 
-                return "Message successfully sent!";
+                return (message, "Message successfully sent!");
             }
             catch (Exception)
             {
